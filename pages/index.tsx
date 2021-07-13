@@ -9,7 +9,9 @@ import Brightness4Icon from '@material-ui/icons/Brightness4';
 import NoSsr from '@material-ui/core/NoSsr';
 import Brightness7Icon from '@material-ui/icons/Brightness7';
 import Typography from '@material-ui/core/Typography';
-import Dashboard from './Dashboard';
+import loadable from '@loadable/component';
+
+const Dashboard = loadable(() => import('./Dashboard'));
 
 const App = () => {
   const [prefersDarkMode, setPrefersDarkMode] = useState(true);
