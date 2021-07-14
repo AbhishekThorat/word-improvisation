@@ -60,7 +60,7 @@ const App = () => {
                 }
               </IconButton>
               <Typography align="center" variant="h3" component="h1" style={{ flexGrow: 1 }}>
-                RANDOM WORD GAME
+                Improvised word game
               </Typography>
             </Box>
           </Box>

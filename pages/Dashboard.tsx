@@ -6,7 +6,6 @@ import Link from '@material-ui/core/Link';
 import Typography from '@material-ui/core/Typography';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Switch from '@material-ui/core/Switch';
@@ -17,9 +16,10 @@ import Modal from '@material-ui/core/Modal';
 import TextField from '@material-ui/core/TextField';
 import SendIcon from '@material-ui/icons/Send';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import { ForceGraph2D } from 'react-force-graph';
 import NoSsr from '@material-ui/core/NoSsr';
 import { Button } from '@material-ui/core';
+import availableWords from "../availableWords";
+import { Graph } from "../components";
 
 const useStyles = makeStyles((theme) => ({
   footer: {
@@ -42,7 +42,6 @@ const useStyles = makeStyles((theme) => ({
   graphSection: {
     flexGrow: 1,
     position: "absolute",
-    background: "lightgrey",
     width: "75%",
     right: 0,
     overflow: "hidden",
@@ -65,7 +64,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-interface IPlayer {
+export interface IPlayer {
   name: string;
   id: number;
   active: boolean
@@ -80,15 +79,31 @@ const Dashboard = () => {
   const [openAddPlayerModal, setOpenAddPlayerModal] = useState<boolean>(false);
   const [playerName, setPlayerName] = useState<string>("");
   const [graphSectionWidth, setGraphSectionWidth] = useState<number>();
+  const [graphSectionHeight, setGraphSectionHeight] = useState<number>();
+  const [enableGenerateWordButton, setEnableGenerateWordButton] = useState<boolean>(false);
+
+  const generateRandomWord = () => {
+    if (!availableWords.length) return
+    const randomizedIndex = Math.floor(Math.random() * availableWords.length)
+    const updatedPlayers = [...players];
+    updatedPlayers[0].prediction = availableWords[randomizedIndex];
+    setPlayers(updatedPlayers);
+  }
 
   useEffect(() => {
     setPlayerName("");
   }, [openAddPlayerModal]);
 
+  useEffect(() => {
+    const unPredictedValues = players.filter((player) => player.active && !player.prediction && !player.isRoot);
+    setEnableGenerateWordButton(unPredictedValues.length === 0);
+  }, [players]);
 
   useEffect(() => {
     if (containerRef.current) {
-      setGraphSectionWidth(containerRef.current.getBoundingClientRect()?.width * 0.75);
+      const clientRect = containerRef.current.getBoundingClientRect();
+      setGraphSectionWidth(clientRect?.width * 0.75);
+      setGraphSectionHeight(clientRect?.height);
     }
   }, [containerRef?.current]);
 
@@ -117,40 +132,6 @@ const Dashboard = () => {
     setPlayers(updatedPlayers);
   };
 
-  function getTree() {
-    const tempPlayers = players.filter(player => player.active)
-    return {
-      nodes: tempPlayers.map(player => ({ id: player.id, name: player.name, prediction: player.prediction, isRoot: player.isRoot })),
-      links: tempPlayers
-        .filter(id => id)
-        .map(player => ({
-          "source": 0,
-          "target": player.id,
-        }))
-    };
-  }
-
-  function nodePaint(data, color, ctx) {
-    const { id, x, y } = data;
-    ctx.fillStyle = color;
-    [
-      () => {
-        ctx.font = '20px Sans-Serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        if (data.prediction) {
-          ctx.fillText(data.prediction, x, y);
-        } else {
-          ctx.fillText("?", x, y);
-        }
-      },
-    ][id % 1]();
-  }
-
-  // gen a number persistent color from around the palette
-  const getColor = n => '#' + ((n * 1234567) % Math.pow(2, 24)).toString(16).padStart(6, '0');
-
-
   const renderAddPlayerModal = (
     <div className={classes.addPlayerModal}>
       <TextField
@@ -172,7 +153,7 @@ const Dashboard = () => {
     <React.Fragment>
       <NoSsr defer>
         <Head>
-          <title>Random word game - Improv Comedy</title>
+          <title>Improvised word game</title>
         </Head>
 
         <div className={classes.container} ref={containerRef}>
@@ -190,49 +171,70 @@ const Dashboard = () => {
               </IconButton>
             </Box>
 
-            <List dense style={{ flexGrow: 1 }}>
-              {players.map((player, playerIndex) => {
-                return player.isRoot ? null : (
-                  <ListItem key={player.id}>
-                    <ListItemAvatar>
-                      <AccountCircle />
-                    </ListItemAvatar>
+            {
+              players.length === 1 && (
+                <React.Fragment>
+                  <Typography align="center" variant="h6" style={{ flexGrow: 1 }}>
+                    Please add players to play!!
+                  </Typography>
+                  <Typography align="center" variant="h6" style={{ flexGrow: 1 }}>
+                    And be ready for improvisation :D
+                  </Typography>
+                </React.Fragment>
+              ) || (
+                <React.Fragment>
+                  <List dense style={{ flexGrow: 1 }}>
+                    {players.map((player, playerIndex) => {
+                      return player.isRoot ? null : (
+                        <ListItem key={player.id}>
+                          <ListItemAvatar>
+                            <AccountCircle />
+                          </ListItemAvatar>
 
-                    <ListItemText
-                      primary={player.name}
-                      secondary={
-                        <Box display="flex">
-                          <TextField
-                            value={player.prediction}
-                            onChange={(event) => handlePlayerPrediction(event.target.value, playerIndex)}
-                            label="Prediction"
-                            disabled={!player.active}
+                          <ListItemText
+                            primary={player.name}
+                            secondary={
+                              <Box display="flex">
+                                <TextField
+                                  value={player.prediction}
+                                  onChange={(event) => handlePlayerPrediction(event.target.value, playerIndex)}
+                                  label="Prediction"
+                                  disabled={!player.active}
+                                  style={{ flexGrow: 1 }}
+                                />
+                                <Switch
+                                  edge="end"
+                                  onChange={handleToggle(player, playerIndex)}
+                                  checked={player.active}
+                                />
+                              </Box>
+                            }
                           />
-                          <Switch
-                            edge="end"
-                            onChange={handleToggle(player, playerIndex)}
-                            checked={player.active}
-                          />
-                        </Box>
-                      }
-                    />
-                  </ListItem>
-                );
-              })}
-            </List>
-            <Button variant="contained" >
-              Generate Word
-            </Button>
+                        </ListItem>
+                      );
+                    })}
+                  </List>
+                  <Box>
+                    {
+                      !enableGenerateWordButton && (
+                        <Typography align="center" variant="h6" component="h6" style={{ flexGrow: 1 }}>
+                          Please predict words for all active players.
+                        </Typography>
+                      )
+                    }
+                    <Button variant="contained" color="primary" style={{ padding: 24, width: "100%" }} onClick={generateRandomWord} disabled={!enableGenerateWordButton} >
+                      Generate Word
+                    </Button>
+                  </Box>
+                </React.Fragment>
+              )
+            }
           </Box>
           <div className={classes.graphSection}>
-            <ForceGraph2D
-              graphData={getTree()}
-              nodeLabel="id"
-              nodeCanvasObject={(node: any, ctx) => nodePaint(node, getColor(node.id), ctx)}
-              nodePointerAreaPaint={nodePaint}
-              minZoom={2}
-              linkWidth={2}
-              width={graphSectionWidth}
+            <Graph
+              players={players}
+              graphSectionWidth={graphSectionWidth}
+              graphSectionHeight={graphSectionHeight}
             />
           </div>
         </div>

@@ -1,0 +1,24 @@
+{
+  "projectName": "word-improvisation",
+  "projectOwner": "Abhishek Thorat",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "commitConvention": "gitmoji",
+  "contributors": [
+    {
+      "login": "AbhishekThorat",
+      "name": "Abhishek Thorat",
+      "avatar_url": "https://avatars.githubusercontent.com/u/18628649?v=4",
+      "profile": "https://github.com/AbhishekThorat",
+      "contributions": [
+        "doc"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}
