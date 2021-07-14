@@ -19,6 +19,7 @@ import SendIcon from '@material-ui/icons/Send';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import { ForceGraph2D } from 'react-force-graph';
 import NoSsr from '@material-ui/core/NoSsr';
+import { Button } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   footer: {
@@ -35,6 +36,8 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: "25%",
     height: "100%",
     flexGrow: 1,
+    display: "flex",
+    flexDirection: "column"
   },
   graphSection: {
     flexGrow: 1,
@@ -66,13 +69,14 @@ interface IPlayer {
   name: string;
   id: number;
   active: boolean
-  prediction?: string;
+  prediction: string;
+  isRoot?: boolean;
 }
 
 const Dashboard = () => {
   const classes = useStyles();
   const containerRef = useRef(null);
-  const [players, setPlayers] = useState<IPlayer[]>([]);
+  const [players, setPlayers] = useState<IPlayer[]>([{ active: true, name: "ROOT", id: 0, prediction: "", isRoot: true }]);
   const [openAddPlayerModal, setOpenAddPlayerModal] = useState<boolean>(false);
   const [playerName, setPlayerName] = useState<string>("");
   const [graphSectionWidth, setGraphSectionWidth] = useState<number>();
@@ -95,6 +99,7 @@ const Dashboard = () => {
         name: playerName,
         active: true,
         id: prevState.length + 1,
+        prediction: ""
       }
     ]);
     setOpenAddPlayerModal(false);
@@ -106,10 +111,16 @@ const Dashboard = () => {
     setPlayers(updatedPlayers);
   };
 
+  const handlePlayerPrediction = (prediction: string, playerIndex: number) => {
+    const updatedPlayers = [...players];
+    updatedPlayers[playerIndex].prediction = prediction;
+    setPlayers(updatedPlayers);
+  };
+
   function getTree() {
-    const tempPlayers = [{ active: true, name: "ROOT", id: 0 }].concat(players)
+    const tempPlayers = players.filter(player => player.active)
     return {
-      nodes: tempPlayers.map(player => ({ id: player.id })),
+      nodes: tempPlayers.map(player => ({ id: player.id, name: player.name, prediction: player.prediction, isRoot: player.isRoot })),
       links: tempPlayers
         .filter(id => id)
         .map(player => ({
@@ -119,10 +130,20 @@ const Dashboard = () => {
     };
   }
 
-  function nodePaint({ id, x, y }, color, ctx) {
+  function nodePaint(data, color, ctx) {
+    const { id, x, y } = data;
     ctx.fillStyle = color;
     [
-      () => { ctx.fillRect(x - 6, y - 4, 20, 12); }, // rectangle
+      () => {
+        ctx.font = '20px Sans-Serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        if (data.prediction) {
+          ctx.fillText(data.prediction, x, y);
+        } else {
+          ctx.fillText("?", x, y);
+        }
+      },
     ][id % 1]();
   }
 
@@ -147,7 +168,6 @@ const Dashboard = () => {
 
     </div>
   );
-
   return (
     <React.Fragment>
       <NoSsr defer>
@@ -170,25 +190,39 @@ const Dashboard = () => {
               </IconButton>
             </Box>
 
-            <List dense>
+            <List dense style={{ flexGrow: 1 }}>
               {players.map((player, playerIndex) => {
-                return (
-                  <ListItem key={player.id} button>
+                return player.isRoot ? null : (
+                  <ListItem key={player.id}>
                     <ListItemAvatar>
                       <AccountCircle />
                     </ListItemAvatar>
-                    <ListItemText primary={player.name} />
-                    <ListItemSecondaryAction>
-                      <Switch
-                        edge="end"
-                        onChange={handleToggle(player, playerIndex)}
-                        checked={player.active}
-                      />
-                    </ListItemSecondaryAction>
+
+                    <ListItemText
+                      primary={player.name}
+                      secondary={
+                        <Box display="flex">
+                          <TextField
+                            value={player.prediction}
+                            onChange={(event) => handlePlayerPrediction(event.target.value, playerIndex)}
+                            label="Prediction"
+                            disabled={!player.active}
+                          />
+                          <Switch
+                            edge="end"
+                            onChange={handleToggle(player, playerIndex)}
+                            checked={player.active}
+                          />
+                        </Box>
+                      }
+                    />
                   </ListItem>
                 );
               })}
             </List>
+            <Button variant="contained" >
+              Generate Word
+            </Button>
           </Box>
           <div className={classes.graphSection}>
             <ForceGraph2D
@@ -196,8 +230,8 @@ const Dashboard = () => {
               nodeLabel="id"
               nodeCanvasObject={(node: any, ctx) => nodePaint(node, getColor(node.id), ctx)}
               nodePointerAreaPaint={nodePaint}
-              minZoom={5}
-              linkWidth={1}
+              minZoom={2}
+              linkWidth={2}
               width={graphSectionWidth}
             />
           </div>
