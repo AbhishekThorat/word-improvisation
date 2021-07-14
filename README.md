@@ -1,12 +1,15 @@
 Random word game to simulate improv comedy for virtually connected team.
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
 [![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 To start the project, will need to do
 
-Project Link:
+Project Link: https://improvised-word.surge.sh/
+We are using surge for deployments.
 
 To Start
 

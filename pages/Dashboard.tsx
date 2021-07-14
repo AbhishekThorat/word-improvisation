@@ -19,7 +19,8 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import NoSsr from '@material-ui/core/NoSsr';
 import { Button } from '@material-ui/core';
 import availableWords from "../availableWords";
-import { Graph } from "../components";
+import loadable from '@loadable/component'
+const Graph = loadable(() => import("../components/Graph"))
 
 const useStyles = makeStyles((theme) => ({
   footer: {
