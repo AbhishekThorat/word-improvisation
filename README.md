@@ -39,7 +39,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="https://github.com/AbhishekThorat"><img src="https://avatars.githubusercontent.com/u/18628649?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Abhishek Thorat</b></sub></a><br /><a href="https://github.com/Abhishek Thorat/word-improvisation/commits?author=AbhishekThorat" title="Documentation">📖</a> <a href="https://github.com/Abhishek Thorat/word-improvisation/commits?author=AbhishekThorat" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/AbhishekThorat"><img src="https://avatars.githubusercontent.com/u/18628649?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Abhishek Thorat</b></sub></a><br /><a href="https://github.com/Abhishek Thorat/word-improvisation/commits?author=AbhishekThorat" title="Documentation">📖</a> <a href="https://github.com/Abhishek Thorat/word-improvisation/commits?author=AbhishekThorat" title="Code">💻</a> <a href="#maintenance-AbhishekThorat" title="Maintenance">🚧</a> <a href="#design-AbhishekThorat" title="Design">🎨</a> <a href="https://github.com/Abhishek Thorat/word-improvisation/pulls?q=is%3Apr+reviewed-by%3AAbhishekThorat" title="Reviewed Pull Requests">👀</a></td>
   </tr>
 </table>
 
