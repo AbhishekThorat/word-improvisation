@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Box from '@material-ui/core/Box';
+import Link from '@material-ui/core/Link';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import IconButton from '@material-ui/core/IconButton';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
@@ -59,6 +60,10 @@ const App = () => {
                   prefersDarkMode ? <Brightness4Icon /> : <Brightness7Icon />
                 }
               </IconButton>
+              <Link target="_blank" color="secondary" href="https://www.youtube.com/watch?v=j4VqaFwW1XI&t=23s" style={{ margin: "auto" }}>
+                {" "}
+                (How to play)
+              </Link>
               <Typography align="center" variant="h3" component="h1" style={{ flexGrow: 1 }}>
                 Improvised word game
               </Typography>
@@ -67,7 +72,7 @@ const App = () => {
           <Dashboard />
         </Box>
       </NoSsr>
-    </ThemeProvider>
+    </ThemeProvider >
   )
 };
 
