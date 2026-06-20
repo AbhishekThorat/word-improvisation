@@ -6,17 +6,28 @@ Random word game to simulate improv comedy for virtually connected team.
 
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-To start the project, will need to do
-
 Project Link: https://improvised-word.surge.sh/
-We are using surge for deployments.
 
-To Start
+Built with Next.js 16, React 19 and MUI 9. The app is a static export
+(`output: 'export'`) deployed to [surge](https://surge.sh/).
+
+### Develop
 
 ```
 npm install
 npm run dev
 ```
+
+### Build & deploy
+
+`npm run build` produces a static site in `out/`. To publish to surge:
+
+```
+npm run deploy
+```
+
+> The contributors table is generated on demand with
+> `npm run contributors:generate` (uses `npx`, no permanent dev dependency).
 
 ## Scope
 

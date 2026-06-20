@@ -1,79 +1,119 @@
-
-import React, { useState } from 'react';
-import { createTheme, ThemeProvider } from '@material-ui/core/styles';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Box from '@material-ui/core/Box';
-import Link from '@material-ui/core/Link';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
-import IconButton from '@material-ui/core/IconButton';
-import Brightness4Icon from '@material-ui/icons/Brightness4';
-import NoSsr from '@material-ui/core/NoSsr';
-import Brightness7Icon from '@material-ui/icons/Brightness7';
-import Typography from '@material-ui/core/Typography';
-import loadable from '@loadable/component';
-
-const Dashboard = loadable(() => import('./Dashboard'));
+import { useMemo, useState } from 'react';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
+import Typography from '@mui/material/Typography';
+import Dashboard from '../components/Dashboard';
+import { getTheme } from '../lib/theme';
 
 const App = () => {
-  const [prefersDarkMode, setPrefersDarkMode] = useState(true);
-
-  const theme = React.useMemo(
-    () =>
-      createTheme({
-        palette: {
-          type: prefersDarkMode ? 'dark' : 'light',
-        },
-        overrides: {
-          MuiCssBaseline: {
-            '@global': {
-              html: {
-                height: "100%",
-                width: "100%",
-              },
-              body: {
-                height: "100%",
-                width: "100%",
-              },
-              [`#__next`]: {
-                height: "100%",
-                width: "100%",
-              }
-            },
-          },
-        },
-      }),
-    [prefersDarkMode],
-  );
+  const [darkMode, setDarkMode] = useState(true);
+  const theme = useMemo(() => getTheme(darkMode ? 'dark' : 'light'), [darkMode]);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <NoSsr defer>
-        <Box display="flex" width="100%" height="100%" flexDirection="column">
-          <Box position="sticky" top="0" zIndex={2} width="100%" borderBottom="1px solid lightgray" paddingY="16px" bgcolor={theme.palette.background.default}>
-            <Box display="flex">
-              <IconButton
-                aria-label="Toggle light/dark theme"
-                onClick={() => setPrefersDarkMode((prev) => !prev)}
-              >
-                {
-                  prefersDarkMode ? <Brightness4Icon /> : <Brightness7Icon />
-                }
-              </IconButton>
-              <Link target="_blank" color="secondary" href="https://www.youtube.com/watch?v=j4VqaFwW1XI&t=23s" style={{ margin: "auto" }}>
-                {" "}
-                (How to play)
-              </Link>
-              <Typography align="center" variant="h3" component="h1" style={{ flexGrow: 1 }}>
-                Improvised word game
-              </Typography>
-            </Box>
+      <Box sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
+        <Box
+          component="header"
+          sx={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 10,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            px: { xs: 2, md: 3 },
+            py: 1.5,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            backdropFilter: 'blur(14px)',
+            bgcolor: 'background.paper',
+          }}
+        >
+          {/* Logo mark: the unknown word */}
+          <Box
+            aria-hidden
+            sx={{
+              width: 40,
+              height: 40,
+              flexShrink: 0,
+              borderRadius: '12px',
+              display: 'grid',
+              placeItems: 'center',
+              color: '#fff',
+              fontFamily: 'var(--font-display)',
+              fontWeight: 700,
+              fontSize: 22,
+              background: 'linear-gradient(135deg, #FF4D9D, #7C5CFF)',
+              boxShadow: '0 8px 22px rgba(124,92,255,0.45)',
+            }}
+          >
+            ?
           </Box>
-          <Dashboard />
+          <Box sx={{ minWidth: 0 }}>
+            <Typography
+              variant="h5"
+              component="h1"
+              noWrap
+              sx={{
+                lineHeight: 1.1,
+                background: 'linear-gradient(135deg, #FF4D9D, #29E7FF)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
+              Improvised word game
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{ color: 'text.secondary', display: { xs: 'none', sm: 'block' } }}
+            >
+              Guess the mind. Justify the chaos.
+            </Typography>
+          </Box>
+
+          <Box sx={{ flexGrow: 1 }} />
+
+          <Button
+            component="a"
+            href="https://www.youtube.com/watch?v=j4VqaFwW1XI&t=23s"
+            target="_blank"
+            rel="noopener"
+            startIcon={<HelpOutlineIcon />}
+            sx={{
+              color: 'text.primary',
+              border: '1px solid',
+              borderColor: 'divider',
+              '& .MuiButton-startIcon': { mr: { xs: 0, sm: 1 } },
+            }}
+          >
+            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+              How to play
+            </Box>
+          </Button>
+          <Tooltip title={darkMode ? 'Switch to light' : 'Switch to dark'}>
+            <IconButton
+              aria-label="Toggle light/dark theme"
+              onClick={() => setDarkMode((prev) => !prev)}
+              sx={{ border: '1px solid', borderColor: 'divider' }}
+            >
+              {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+            </IconButton>
+          </Tooltip>
         </Box>
-      </NoSsr>
-    </ThemeProvider >
-  )
+
+        <Dashboard />
+      </Box>
+    </ThemeProvider>
+  );
 };
 
 export default App;
