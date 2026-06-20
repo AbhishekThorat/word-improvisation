@@ -28,9 +28,9 @@ const App = () => {
             zIndex: 10,
             display: 'flex',
             alignItems: 'center',
-            gap: 1.5,
-            px: { xs: 2, md: 3 },
-            py: 1.5,
+            gap: { xs: 1, sm: 1.5 },
+            px: { xs: 1.5, md: 3 },
+            py: { xs: 1, sm: 1.5 },
             borderBottom: '1px solid',
             borderColor: 'divider',
             backdropFilter: 'blur(14px)',
@@ -41,8 +41,8 @@ const App = () => {
           <Box
             aria-hidden
             sx={{
-              width: 40,
-              height: 40,
+              width: { xs: 34, sm: 40 },
+              height: { xs: 34, sm: 40 },
               flexShrink: 0,
               borderRadius: '12px',
               display: 'grid',
@@ -50,7 +50,7 @@ const App = () => {
               color: '#fff',
               fontFamily: 'var(--font-display)',
               fontWeight: 700,
-              fontSize: 22,
+              fontSize: { xs: 19, sm: 22 },
               background: 'linear-gradient(135deg, #FF4D9D, #7C5CFF)',
               boxShadow: '0 8px 22px rgba(124,92,255,0.45)',
             }}
@@ -64,6 +64,7 @@ const App = () => {
               noWrap
               sx={{
                 lineHeight: 1.1,
+                fontSize: { xs: '1.15rem', sm: '1.5rem' },
                 background: 'linear-gradient(135deg, #FF4D9D, #29E7FF)',
                 WebkitBackgroundClip: 'text',
                 backgroundClip: 'text',

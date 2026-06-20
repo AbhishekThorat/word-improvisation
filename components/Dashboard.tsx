@@ -2,14 +2,19 @@ import { useEffect, useState, useRef } from 'react';
 import Head from 'next/head';
 import dynamic from 'next/dynamic';
 import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 import Switch from '@mui/material/Switch';
 import IconButton from '@mui/material/IconButton';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 import AddIcon from '@mui/icons-material/Add';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
 import CasinoIcon from '@mui/icons-material/Casino';
+import GroupsIcon from '@mui/icons-material/Groups';
+import BubbleChartIcon from '@mui/icons-material/BubbleChart';
 import Modal from '@mui/material/Modal';
 import TextField from '@mui/material/TextField';
 import SendIcon from '@mui/icons-material/Send';
@@ -33,11 +38,17 @@ const ROOT_PLAYER: IPlayer = {
 const Dashboard = () => {
   const theme = useTheme();
   const mode = theme.palette.mode;
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const stageRef = useRef<HTMLDivElement>(null);
   const [players, setPlayers] = useState<IPlayer[]>([ROOT_PLAYER]);
   const [openAddPlayerModal, setOpenAddPlayerModal] = useState(false);
   const [playerName, setPlayerName] = useState('');
   const [graphSize, setGraphSize] = useState<{ width?: number; height?: number }>({});
+  // On phones the two panes are swapped via a segmented toggle instead of stacked.
+  const [mobileView, setMobileView] = useState<'players' | 'stage'>('players');
+
+  const showPlayers = !isMobile || mobileView === 'players';
+  const showStage = !isMobile || mobileView === 'stage';
 
   const guessers = players.filter((p) => !p.isRoot);
   const activePredictorsPending = players.some(
@@ -66,12 +77,24 @@ const Dashboard = () => {
     return () => observer.disconnect();
   }, []);
 
+  // Re-measure when the constellation pane (un)hides behind the mobile toggle.
+  useEffect(() => {
+    const element = stageRef.current;
+    if (!element || !showStage) return;
+    const rect = element.getBoundingClientRect();
+    if (rect.width && rect.height) {
+      setGraphSize({ width: rect.width, height: rect.height });
+    }
+  }, [showStage]);
+
   const generateRandomWord = () => {
     if (!availableWords.length) return;
     const word = availableWords[Math.floor(Math.random() * availableWords.length)];
     setPlayers((prev) =>
       prev.map((p) => (p.isRoot ? { ...p, prediction: word } : p)),
     );
+    // Jump to the constellation so the reveal is front-and-centre on phones.
+    if (isMobile) setMobileView('stage');
   };
 
   const handleAddPlayer = () => {
@@ -112,6 +135,34 @@ const Dashboard = () => {
       </Head>
 
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        {/* Mobile-only segmented toggle between the two panes. */}
+        {isMobile && (
+          <Tabs
+            value={mobileView}
+            onChange={(_, v) => setMobileView(v)}
+            variant="fullWidth"
+            sx={{
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+              minHeight: 48,
+            }}
+          >
+            <Tab
+              value="players"
+              icon={<GroupsIcon fontSize="small" />}
+              iconPosition="start"
+              label="Players"
+              sx={{ minHeight: 48, textTransform: 'none', fontWeight: 700 }}
+            />
+            <Tab
+              value="stage"
+              icon={<BubbleChartIcon fontSize="small" />}
+              iconPosition="start"
+              label="Constellation"
+              sx={{ minHeight: 48, textTransform: 'none', fontWeight: 700 }}
+            />
+          </Tabs>
+        )}
         <Box
           sx={{
             flex: 1,
@@ -123,13 +174,12 @@ const Dashboard = () => {
           {/* ---------- Players panel ---------- */}
           <Box
             sx={{
-              width: { xs: '100%', md: 360 },
-              flexShrink: 0,
-              display: 'flex',
+              display: showPlayers ? 'flex' : 'none',
+              width: { md: 360 },
+              flex: { xs: 1, md: '0 0 360px' },
               flexDirection: 'column',
               borderRight: { md: '1px solid' },
-              borderBottom: { xs: '1px solid', md: 'none' },
-              borderColor: { xs: 'divider', md: 'divider' },
+              borderColor: 'divider',
               minHeight: 0,
             }}
           >
@@ -287,10 +337,11 @@ const Dashboard = () => {
           <Box
             ref={stageRef}
             sx={{
+              display: showStage ? 'block' : 'none',
               flex: 1,
               position: 'relative',
               overflow: 'hidden',
-              minHeight: { xs: 380, md: 0 },
+              minHeight: 0,
             }}
           >
             <Chip
