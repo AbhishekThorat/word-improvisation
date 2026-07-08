@@ -11,8 +11,10 @@ import IconButton from '@mui/material/IconButton';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import AddIcon from '@mui/icons-material/Add';
+import CloseIcon from '@mui/icons-material/Close';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
 import CasinoIcon from '@mui/icons-material/Casino';
+import ReplayIcon from '@mui/icons-material/Replay';
 import GroupsIcon from '@mui/icons-material/Groups';
 import BubbleChartIcon from '@mui/icons-material/BubbleChart';
 import Modal from '@mui/material/Modal';
@@ -40,6 +42,11 @@ const Dashboard = () => {
   const mode = theme.palette.mode;
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const stageRef = useRef<HTMLDivElement>(null);
+  // Shuffled deck of remaining words so a session never repeats a word until
+  // the whole list is exhausted.
+  const deckRef = useRef<string[]>([]);
+  // Monotonic id source — ids must stay stable/unique even after removals.
+  const nextPlayerIdRef = useRef(1);
   const [players, setPlayers] = useState<IPlayer[]>([ROOT_PLAYER]);
   const [openAddPlayerModal, setOpenAddPlayerModal] = useState(false);
   const [playerName, setPlayerName] = useState('');
@@ -52,7 +59,7 @@ const Dashboard = () => {
 
   const guessers = players.filter((p) => !p.isRoot);
   const activePredictorsPending = players.some(
-    (p) => p.active && !p.prediction && !p.isRoot,
+    (p) => p.active && !p.prediction.trim() && !p.isRoot,
   );
   const hasPlayers = guessers.length > 0;
   const canGenerateWord = hasPlayers && !activePredictorsPending;
@@ -89,7 +96,16 @@ const Dashboard = () => {
 
   const generateRandomWord = () => {
     if (!availableWords.length) return;
-    const word = availableWords[Math.floor(Math.random() * availableWords.length)];
+    if (deckRef.current.length === 0) {
+      // Refill and Fisher–Yates shuffle once the deck runs dry.
+      const deck = [...availableWords];
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+      deckRef.current = deck;
+    }
+    const word = deckRef.current.pop()!;
     setPlayers((prev) =>
       prev.map((p) => (p.isRoot ? { ...p, prediction: word } : p)),
     );
@@ -97,14 +113,24 @@ const Dashboard = () => {
     if (isMobile) setMobileView('stage');
   };
 
+  // Clear the secret word and every guess so the next round starts fresh.
+  const startNewRound = () => {
+    setPlayers((prev) => prev.map((p) => ({ ...p, prediction: '' })));
+    if (isMobile) setMobileView('players');
+  };
+
   const handleAddPlayer = () => {
     const name = playerName.trim();
     if (!name) return;
     setPlayers((prev) => [
       ...prev,
-      { name, active: true, id: prev.length, prediction: '' },
+      { name, active: true, id: nextPlayerIdRef.current++, prediction: '' },
     ]);
     setOpenAddPlayerModal(false);
+  };
+
+  const handleRemovePlayer = (id: number) => () => {
+    setPlayers((prev) => prev.filter((p) => p.id !== id));
   };
 
   const handleToggle = (id: number) => () => {
@@ -279,12 +305,32 @@ const Dashboard = () => {
                           sx={{ mt: 0.5 }}
                         />
                       </Box>
-                      <Switch
-                        edge="end"
-                        onChange={handleToggle(player.id)}
-                        checked={player.active}
-                        slotProps={{ input: { 'aria-label': `Toggle ${player.name}` } }}
-                      />
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: 0.5,
+                        }}
+                      >
+                        <Switch
+                          edge="end"
+                          onChange={handleToggle(player.id)}
+                          checked={player.active}
+                          slotProps={{ input: { 'aria-label': `Toggle ${player.name}` } }}
+                        />
+                        <IconButton
+                          size="small"
+                          aria-label={`Remove ${player.name}`}
+                          onClick={handleRemovePlayer(player.id)}
+                          sx={{
+                            color: 'text.secondary',
+                            '&:hover': { color: 'error.main' },
+                          }}
+                        >
+                          <CloseIcon fontSize="inherit" />
+                        </IconButton>
+                      </Box>
                     </Box>
                   );
                 })
@@ -318,18 +364,32 @@ const Dashboard = () => {
                   Everyone needs a guess before the reveal.
                 </Typography>
               )}
-              <Button
-                variant="contained"
-                color="primary"
-                size="large"
-                fullWidth
-                startIcon={<CasinoIcon />}
-                sx={{ py: 1.5, fontSize: 16 }}
-                onClick={generateRandomWord}
-                disabled={!canGenerateWord}
-              >
-                {secretWord ? 'Reveal another word' : 'Reveal the word'}
-              </Button>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                {secretWord && (
+                  <Button
+                    variant="outlined"
+                    color="inherit"
+                    size="large"
+                    startIcon={<ReplayIcon />}
+                    sx={{ py: 1.5, borderColor: 'divider', color: 'text.secondary' }}
+                    onClick={startNewRound}
+                  >
+                    New round
+                  </Button>
+                )}
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  fullWidth
+                  startIcon={<CasinoIcon />}
+                  sx={{ py: 1.5, fontSize: 16 }}
+                  onClick={generateRandomWord}
+                  disabled={!canGenerateWord}
+                >
+                  {secretWord ? 'Reveal another word' : 'Reveal the word'}
+                </Button>
+              </Box>
             </Box>
           </Box>
 

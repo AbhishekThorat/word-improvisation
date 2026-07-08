@@ -32,13 +32,22 @@ npm run deploy
 ## Scope
 
 - [ ] UX Review & Style enhancement
-- [ ] Add proper credits for all data
-- [ ] Mobile UI support.
+- [x] Add proper credits for all data
+- [x] Mobile UI support.
 - [ ] Add rules section.
 
 ## Credit
 
-- Credit part is pending. (But for now we have taken all nouns from https://wordcounter.net/random-word-generator)
+The word list in `availableWords.ts` (~1,400 words) comes from two sources:
+
+- **Base noun list (~950 words)** — the random word generator at
+  [wordcounter.net](https://wordcounter.net/random-word-generator).
+- **2026 expansion (~440 words)** — curated by project
+  [contributors](#contributors-), grouped by theme (professions, animals,
+  food, places, objects, fantasy, nature, abstract concepts).
+
+If you add words, please keep them in the appropriate section of
+`availableWords.ts` and note the source here if they come from elsewhere.
 
 ## License
 
